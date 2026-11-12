@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio da Manutenção</title>
+<style>
+:root{--bg:#0b1220;--panel:#131f33;--panel2:#1a2a43;--text:#f4f7fb;--muted:#a9b8cc;--blue:#48a5ff;--green:#2ecc91;--red:#ff6677;--gold:#ffd166}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#1b3557 0,#0b1220 55%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;justify-content:center;padding:24px}
+.wrap{width:min(760px,100%)}.brand{text-align:center;color:var(--muted);font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 12px}
+h1{text-align:center;font-size:clamp(2rem,6vw,3rem);margin:0 0 8px}.sub{text-align:center;color:var(--muted);margin:0 0 24px}
+.card{background:linear-gradient(145deg,rgba(26,42,67,.98),rgba(16,29,48,.98));border:1px solid #2b4262;border-radius:22px;padding:clamp(18px,4vw,30px);box-shadow:0 20px 60px #0005}
+label{display:block;font-weight:700;margin:18px 0 9px}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+button,select{font:inherit}button{cursor:pointer;border:1px solid #3a5273;background:#203653;color:var(--text);border-radius:13px;padding:12px 14px;font-weight:700;transition:.15s}
+button:hover{transform:translateY(-1px);border-color:var(--blue);background:#29466b}button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button.selected{background:#164d7e;border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.primary{width:100%;margin-top:24px;background:linear-gradient(90deg,#167bd0,#345fe4);border:0;padding:15px;font-size:1.05rem}
+.note{font-size:.88rem;color:var(--muted);line-height:1.5;margin-top:18px;text-align:center}
+.hidden{display:none!important}.topline{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.9rem;margin-bottom:12px}
+.progress{height:9px;background:#0b1728;border-radius:20px;overflow:hidden;margin-bottom:22px}.bar{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#4f7cff);transition:width .25s}
+.stats{display:flex;justify-content:space-between;gap:10px;margin-bottom:22px}.stat{background:#0d1a2b;padding:10px 14px;border-radius:12px;text-align:center;flex:1}.stat b{display:block;font-size:1.2rem}.stat small{color:var(--muted)}
+.tag{display:inline-block;color:#b8dcff;background:#173c60;border-radius:30px;padding:5px 11px;font-size:.8rem;font-weight:800;margin-bottom:12px}
+.question{font-size:clamp(1.2rem,4vw,1.65rem);font-weight:800;line-height:1.3;margin:4px 0 20px}
+.answers{display:grid;gap:10px}.answer{text-align:left;display:flex;align-items:center;gap:12px;padding:14px}.letter{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:#10243b;display:grid;place-items:center;color:#a9d6ff}
+.answer.correct{background:#124a3a;border-color:var(--green)}.answer.wrong{background:#512735;border-color:var(--red)}.answer:disabled{cursor:default;transform:none}
+.feedback{margin-top:16px;border-radius:13px;padding:14px;line-height:1.45;background:#0d1a2b;border:1px solid #2b4262}.feedback.good{border-color:var(--green)}.feedback.bad{border-color:var(--red)}
+.actions{display:flex;gap:10px;margin-top:18px}.actions button{flex:1}.secondary{background:transparent}
+.result{text-align:center}.medal{font-size:3.5rem;margin:5px}.score{font-size:2.6rem;font-weight:900;color:var(--gold);margin:8px}.resultgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:20px 0}.resultgrid .stat{padding:15px 8px}
+@media(max-width:520px){body{padding:14px}.choices{grid-template-columns:1fr 1fr}.stats{gap:6px}.stat{padding:9px 5px}.stat small{font-size:.72rem}.actions{flex-direction:column}.resultgrid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="brand">Laboratório de informática • Quiz</div>
+  <h1>🖥️ Desafio da Manutenção</h1>
+  <p class="sub">Teste seus conhecimentos sobre hardware, software e cuidados com o computador.</p>
+
+  <section class="card" id="setup">
+    <h2>Preparado para o desafio?</h2>
+    <p style="color:var(--muted)">Escolha quantas perguntas quer responder e o nível de dificuldade.</p>
+    <label>Quantidade de perguntas</label>
+    <div class="choices" id="amounts">
+      <button class="selected" data-value="10">10 perguntas</button>
+      <button data-value="20">20 perguntas</button>
+      <button data-value="30">30 perguntas</button>
+    </div>
+    <label>Dificuldade</label>
+    <div class="choices" id="levels">
+      <button class="selected" data-value="Misto">Misto</button>
+      <button data-value="Fácil">Fácil</button>
+      <button data-value="Médio">Médio</button>
+      <button data-value="Difícil">Difícil</button>
+    </div>
+    <button class="primary" id="start">Começar desafio ▶</button>
+    <p class="note">Dica: leia cada pergunta com atenção. Você verá uma explicação depois de responder.</p>
+  </section>
+
+  <section class="card hidden" id="game">
+    <div class="topline"><span id="counter">Pergunta 1/10</span><span id="levelTag">Fácil</span></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="stats">
+      <div class="stat"><b id="points">0</b><small>Pontos</small></div>
+      <div class="stat"><b id="streak">0</b><small>Sequência</small></div>
+      <div class="stat"><b id="hits">0</b><small>Acertos</small></div>
+    </div>
+    <div class="tag" id="category">HARDWARE</div>
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback hidden" id="feedback" aria-live="polite"></div>
+    <div class="actions">
+      <button class="secondary" id="quit">Encerrar</button>
+      <button class="primary" id="next" disabled>Próxima pergunta →</button>
+    </div>
+  </section>
+
+  <section class="card hidden result" id="result">
+    <div class="medal" id="medal">🏆</div>
+    <h2 id="resultTitle">Desafio concluído!</h2>
+    <p style="color:var(--muted)" id="resultText"></p>
+    <div class="score" id="finalScore">0 pontos</div>
+    <div class="resultgrid">
+      <div class="stat"><b id="finalHits">0/10</b><small>Acertos</small></div>
+      <div class="stat"><b id="finalStreak">0</b><small>Maior sequência</small></div>
+      <div class="stat"><b id="finalRate">0%</b><small>Aproveitamento</small></div>
+    </div>
+    <button class="primary" id="again">Jogar novamente ↻</button>
+    <button class="secondary" style="width:100%;margin-top:10px" id="options">Mudar opções</button>
+  </section>
+</main>
+<script>
+const bank = [
+{l:"Fácil",c:"HARDWARE",q:"Qual componente é considerado o “cérebro” do computador?",a:["Memória RAM","Processador (CPU)","Fonte de alimentação","Placa de vídeo"],k:1,e:"O processador executa instruções e realiza operações fundamentais do computador."},
+{l:"Fácil",c:"HARDWARE",q:"Qual é a principal função da memória RAM?",a:["Guardar arquivos para sempre","Exibir imagens no monitor","Armazenar temporariamente dados em uso","Fornecer energia ao computador"],k:2,e:"A RAM guarda temporariamente dados e programas que estão sendo utilizados. Seu conteúdo é perdido quando o computador é desligado."},
+{l:"Fácil",c:"HARDWARE",q:"Qual peça fornece energia elétrica aos componentes do computador?",a:["Fonte de alimentação","SSD","Cooler","Placa-mãe"],k:0,e:"A fonte converte a energia da tomada em tensões adequadas para os componentes."},
+{l:"Fácil",c:"HARDWARE",q:"Para que serve o cooler?",a:["Armazenar documentos","Resfriar componentes","Conectar à internet","Aumentar a memória RAM"],k:1,e:"O cooler ajuda a retirar o calor do processador ou de outros componentes."},
+{l:"Fácil",c:"HARDWARE",q:"Qual componente conecta e permite a comunicação entre várias peças?",a:["Monitor","Teclado","Placa-mãe","Mouse"],k:2,e:"A placa-mãe é a placa principal, onde diversos componentes são conectados."},
+{l:"Fácil",c:"SOFTWARE",q:"Qual alternativa apresenta um sistema operacional?",a:["Windows","Teclado","HD","Memória RAM"],k:0,e:"Windows é um sistema operacional, assim como Linux e macOS."},
+{l:"Fácil",c:"MANUTENÇÃO",q:"Antes de abrir o gabinete para uma manutenção interna, o que deve ser feito?",a:["Molhar as mãos","Desligar e desconectar o computador da tomada","Retirar a memória RAM com o PC ligado","Aumentar o volume"],k:1,e:"Desligar e desconectar o equipamento reduz riscos elétricos e evita danos aos componentes."},
+{l:"Fácil",c:"ARMAZENAMENTO",q:"Qual dispositivo costuma ser usado para armazenar arquivos mesmo sem energia?",a:["Memória RAM","Cache","SSD","Registrador da CPU"],k:2,e:"O SSD é um dispositivo de armazenamento não volátil: mantém os dados mesmo desligado."},
+{l:"Fácil",c:"PERIFÉRICOS",q:"Qual destes é um periférico de entrada?",a:["Monitor","Impressora","Caixa de som","Teclado"],k:3,e:"O teclado envia informações para o computador, por isso é um dispositivo de entrada."},
+{l:"Fácil",c:"MANUTENÇÃO",q:"Qual atitude ajuda a manter o computador em boas condições?",a:["Bloquear todas as saídas de ar","Manter o equipamento limpo e ventilado","Puxar os cabos pelo fio","Comer sobre o teclado"],k:1,e:"Limpeza adequada e boa ventilação ajudam a evitar superaquecimento e falhas."},
+{l:"Médio",c:"HARDWARE",q:"Qual é a função principal da BIOS/UEFI durante a inicialização?",a:["Editar fotos","Inicializar e verificar componentes e iniciar o processo de boot","Aumentar a velocidade da internet","Substituir o sistema operacional"],k:1,e:"BIOS/UEFI é o firmware que inicializa o hardware e prepara a execução do sistema operacional."},
+{l:"Médio",c:"ARMAZENAMENTO",q:"Qual é uma vantagem comum do SSD em relação ao HD tradicional?",a:["Não precisa de energia","Tem partes mecânicas móveis","Geralmente oferece maior velocidade de leitura e gravação","Sempre possui mais capacidade"],k:2,e:"O SSD usa memória flash e, em geral, oferece inicialização e carregamento mais rápidos."},
+{l:"Médio",c:"MANUTENÇÃO",q:"O computador liga, mas não aparece imagem. Qual verificação simples faz sentido primeiro?",a:["Verificar cabo, entrada e alimentação do monitor","Formatar imediatamente o HD","Trocar o processador sem testar","Apagar os arquivos do usuário"],k:0,e:"Comece por verificações simples e externas: energia do monitor, cabo de vídeo e entrada selecionada."},
+{l:"Médio",c:"HARDWARE",q:"O que significa a sigla CPU?",a:["Central Program Utility","Computer Personal Unit","Central Processing Unit","Control Power USB"],k:2,e:"CPU significa Central Processing Unit, ou Unidade Central de Processamento."},
+{l:"Médio",c:"MANUTENÇÃO",q:"Por que é importante organizar os cabos dentro do gabinete?",a:["Para deixar o computador mais pesado","Para melhorar a circulação de ar e facilitar a manutenção","Para aumentar a capacidade do SSD","Para mudar o sistema operacional"],k:1,e:"Uma boa organização reduz obstáculos ao fluxo de ar e facilita inspeções e reparos."},
+{l:"Médio",c:"SOFTWARE",q:"O que é um driver?",a:["Um tipo de cabo de energia","Um programa que permite ao sistema operacional comunicar-se com um dispositivo","Uma peça que resfria a CPU","Um arquivo de imagem"],k:1,e:"Drivers permitem que o sistema operacional reconheça e utilize corretamente dispositivos de hardware."},
+{l:"Médio",c:"SEGURANÇA",q:"Qual prática é recomendada antes de uma manutenção que possa afetar arquivos?",a:["Fazer backup dos dados importantes","Apagar a pasta do sistema","Desativar todas as proteções","Desconectar o monitor durante uma atualização"],k:0,e:"O backup protege os arquivos caso ocorra algum problema durante o serviço."},
+{l:"Médio",c:"HARDWARE",q:"Qual componente é responsável pelo processamento gráfico?",a:["Placa de vídeo (GPU)","Fonte","Cooler do gabinete","Bateria CMOS"],k:0,e:"A GPU processa gráficos e imagens, podendo ser integrada ou dedicada."},
+{l:"Médio",c:"MANUTENÇÃO",q:"O que pode acontecer se o dissipador do processador estiver mal encaixado?",a:["O computador ganha mais memória","O processador pode superaquecer","A tela fica maior","O teclado para de produzir letras"],k:1,e:"O contato inadequado prejudica a transferência de calor e pode causar superaquecimento."},
+{l:"Médio",c:"REDES",q:"Qual equipamento normalmente distribui a conexão de rede entre vários dispositivos?",a:["Roteador","Cooler","Estabilizador","Leitor de DVD"],k:0,e:"O roteador encaminha o tráfego entre redes e geralmente distribui a conexão para vários aparelhos."},
+{l:"Difícil",c:"HARDWARE",q:"O que é pasta térmica?",a:["Um produto usado entre o processador e o dissipador para melhorar a transferência de calor","Um lubrificante para o HD","Um tipo de memória","Um programa de diagnóstico"],k:0,e:"A pasta térmica preenche pequenas imperfeições entre as superfícies e melhora a transferência térmica."},
+{l:"Difícil",c:"DIAGNÓSTICO",q:"O que indica, em geral, um aviso de “SMART” relacionado ao armazenamento?",a:["Possível problema ou degradação detectada no dispositivo","Que a memória RAM está cheia","Que o monitor está sem energia","Que o teclado está desconectado"],k:0,e:"SMART monitora indicadores de funcionamento de unidades de armazenamento e pode alertar sobre falhas iminentes."},
+{l:"Difícil",c:"HARDWARE",q:"Qual é a função da bateria CMOS em muitos computadores?",a:["Alimentar o processador","Manter o relógio e certas configurações do firmware quando o PC está desligado","Resfriar a placa-mãe","Armazenar o sistema operacional"],k:1,e:"A bateria mantém o relógio em tempo real e configurações relacionadas ao firmware em muitos modelos."},
+{l:"Difícil",c:"DIAGNÓSTICO",q:"Um computador reinicia sozinho quando executa tarefas pesadas. Qual hipótese merece investigação?",a:["Superaquecimento ou problema na alimentação elétrica","Papel preso na impressora","Brilho baixo do monitor","Idioma incorreto do teclado"],k:0,e:"Temperaturas elevadas e alimentação instável são possibilidades; o diagnóstico deve verificar registros, temperaturas e componentes."},
+{l:"Difícil",c:"HARDWARE",q:"O que significa dual-channel na memória RAM?",a:["Usar dois sistemas operacionais","Uma configuração que permite comunicação por dois canais de memória","Ter duas fontes no gabinete","Dividir o HD em duas partições"],k:1,e:"Dual-channel pode aumentar a largura de banda da memória quando módulos e plataforma são compatíveis."},
+{l:"Difícil",c:"SEGURANÇA",q:"Por que é recomendado utilizar proteção antiestática ao manusear componentes internos?",a:["Para evitar danos causados por descarga eletrostática","Para aumentar a tensão da fonte","Para acelerar a internet","Para limpar os contatos com água"],k:0,e:"Descargas eletrostáticas podem danificar componentes sensíveis. Siga procedimentos adequados de aterramento e manuseio."},
+{l:"Difícil",c:"ARMAZENAMENTO",q:"Qual afirmação sobre formatação de uma unidade está correta?",a:["Sempre recupera arquivos apagados","Prepara a unidade com uma estrutura de sistema de arquivos e pode apagar dados","Aumenta fisicamente a capacidade","Substitui a memória RAM"],k:1,e:"A formatação prepara a unidade para armazenar arquivos; dependendo do tipo, pode remover o acesso aos dados existentes. Faça backup antes."},
+{l:"Difícil",c:"HARDWARE",q:"O que é o chipset da placa-mãe?",a:["Um conjunto de circuitos que gerencia a comunicação entre componentes e recursos da plataforma","Um programa antivírus","Um tipo de monitor","Uma ferramenta para apertar parafusos"],k:0,e:"O chipset participa do gerenciamento de comunicação e recursos da placa-mãe, conforme a arquitetura da plataforma."},
+{l:"Difícil",c:"DIAGNÓSTICO",q:"Qual é uma boa prática ao investigar uma falha intermitente?",a:["Trocar todas as peças de uma vez","Registrar sintomas e testar uma variável por vez","Ignorar quando o PC volta a funcionar","Formatar sem fazer cópia dos arquivos"],k:1,e:"Registrar sintomas e alterar uma variável por vez ajuda a identificar a causa sem introduzir novos problemas."},
+{l:"Difícil",c:"HARDWARE",q:"Qual característica diferencia memória volátil de não volátil?",a:["A volátil mantém dados sem energia","A não volátil perde tudo ao desligar","A volátil depende de energia para manter os dados; a não volátil mantém","Não existe diferença"],k:2,e:"RAM é volátil; SSDs e HDs são exemplos de armazenamento não volátil."}
+];
+
+let amount=10, level="Misto", questions=[], index=0, points=0, hits=0, streak=0, best=0, answered=false;
+const $=id=>document.getElementById(id);
+function choose(group, value){document.querySelectorAll(`#${group} button`).forEach(b=>b.classList.toggle("selected",b.dataset.value===value));}
+document.querySelectorAll("#amounts button").forEach(b=>b.onclick=()=>{amount=Number(b.dataset.value);choose("amounts",b.dataset.value)});
+document.querySelectorAll("#levels button").forEach(b=>b.onclick=()=>{level=b.dataset.value;choose("levels",level)});
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+function startGame(){
+ let pool=level==="Misto"?shuffle(bank):shuffle(bank.filter(q=>q.l===level));
+ questions=pool.slice(0,Math.min(amount,pool.length));
+ index=0;points=0;hits=0;streak=0;best=0;
+ $("setup").classList.add("hidden");$("result").classList.add("hidden");$("game").classList.remove("hidden");
+ render();
+}
+function render(){
+ answered=false;
+ const q=questions[index];
+ $("counter").textContent=`Pergunta ${index+1}/${questions.length}`;
+ $("levelTag").textContent=q.l;
+ $("bar").style.width=`${index/questions.length*100}%`;
+ $("points").textContent=points;$("streak").textContent=streak;$("hits").textContent=hits;
+ $("category").textContent=q.c;
+ $("question").textContent=q.q;
+ $("feedback").className="feedback hidden";$("feedback").textContent="";
+ $("next").disabled=true;$("next").textContent=index===questions.length-1?"Ver resultado ★":"Próxima pergunta →";
+ const box=$("answers");box.innerHTML="";
+ q.a.forEach((answer,i)=>{
+  const btn=document.createElement("button");btn.className="answer";
+  const letter=document.createElement("span");letter.className="letter";letter.textContent=""+String.fromCharCode(65+i);
+  const txt=document.createElement("span");txt.textContent=answer;
+  btn.append(letter,txt);btn.onclick=()=>selectAnswer(i,btn);box.append(btn);
+ });
+}
+function selectAnswer(choice, clicked){
+ if(answered)return;answered=true;
+ const q=questions[index], buttons=[...$("answers").children], correct=choice===q.k;
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===q.k)b.classList.add("correct");});
+ if(correct){hits++;streak++;best=Math.max(best,streak);points+=q.l==="Difícil"?150:q.l==="Médio"?120:100;}
+ else{streak=0;clicked.classList.add("wrong");}
+ $("points").textContent=points;$("streak").textContent=streak;$("hits").textContent=hits;
+ const fb=$("feedback");fb.className=`feedback ${correct?"good":"bad"}`;
+ fb.innerHTML=`<strong>${correct?"✓ Muito bem!":"✗ Não foi dessa vez."}</strong><br>${correct?"Você acertou!":`Resposta correta: <b>${q.a[q.k]}</b>.`}<br>${q.e}`;
+ $("next").disabled=false;
+}
+function finish(){
+ $("game").classList.add("hidden");$("result").classList.remove("hidden");
+ const rate=Math.round(hits/questions.length*100);
+ $("medal").textContent=rate>=90?"🏆":rate>=70?"🥇":rate>=50?"🧰":"📘";
+ $("resultTitle").textContent=rate>=90?"Técnico de primeira!":rate>=70?"Muito bom trabalho!":rate>=50?"Bom começo!":"Continue praticando!";
+ $("resultText").textContent=rate>=70?"Você demonstrou um bom domínio de manutenção de computadores.":"Revise as explicações e tente novamente para melhorar sua pontuação.";
+ $("finalScore").textContent=`${points} pontos`;
+ $("finalHits").textContent=`${hits}/${questions.length}`;$("finalStreak").textContent=best;$("finalRate").textContent=`${rate}%`;
+}
+$("start").onclick=startGame;
+$("next").onclick=()=>{if(index<questions.length-1){index++;render();}else finish();};
+$("quit").onclick=()=>{if(confirm("Deseja encerrar o desafio? Seu progresso desta partida será perdido.")){ $("game").classList.add("hidden");$("setup").classList.remove("hidden");}};
+$("again").onclick=startGame;
+$("options").onclick=()=>{$("result").classList.add("hidden");$("setup").classList.remove("hidden");};
+</script>
+</body>
+</html>
